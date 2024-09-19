@@ -1,0 +1,68 @@
+import re
+
+# Definimos los tipos de tokens que el lexer reconocerá.
+TOKENS = [
+    ('NUMBER',   r'\d+'),                # Números
+    ('ID',       r'[a-zA-Z_]\w*'),       # Identificadores
+    ('PLUS',     r'\+'),                 # Operador +
+    ('MINUS',    r'-'),                  # Operador -
+    ('TIMES',    r'\*'),                 # Operador *
+    ('DIVIDE',   r'/'),                  # Operador /
+    ('EQ',       r'='),                  # Operador =
+    ('EQEQ',     r'=='),                 # Operador ==
+    ('LPAREN',   r'\('),                 # Paréntesis izquierdo
+    ('RPAREN',   r'\)'),                 # Paréntesis derecho
+    ('LBRACE',   r'\{'),                 # Llave izquierda
+    ('RBRACE',   r'\}'),                 # Llave derecha
+    ('SEMI',     r';'),                  # Punto y coma ;
+    ('WHITESPACE', r'\s+'),              # Espacios en blanco (se ignoran)
+    ('KEYWORD',  r'\b(if|else|while|return)\b'),  # Palabras clave
+]
+
+# Clase Token que representa un token del lexer.
+class Token:
+    def __init__(self, type_, value):
+        self.type = type_  # El tipo de token (e.g., NUMBER, ID, etc.)
+        self.value = value  # El valor del token (e.g., '123', 'if', etc.)
+
+    def __repr__(self):
+        return f'Token({self.type}, {self.value})'
+
+# Clase Lexer que convierte el código fuente en tokens.
+class Lexer:
+    def __init__(self, source_code):
+        self.source_code = source_code
+        self.tokens = []
+        self.position = 0
+
+    def tokenize(self):
+        # Combina todos los patrones de tokens en una sola expresión regular.
+        token_regex = '|'.join(f'(?P<{name}>{pattern})' for name, pattern in TOKENS)
+        scanner = re.compile(token_regex)
+
+        # Buscar los tokens en el código fuente
+        for match in scanner.finditer(self.source_code):
+            token_type = match.lastgroup
+            token_value = match.group()
+
+            if token_type == 'WHITESPACE':
+                continue  # Ignorar los espacios en blanco
+            self.tokens.append(Token(token_type, token_value))
+
+        return self.tokens
+
+# Ejemplo de uso
+if __name__ == "__main__":
+    # Código fuente de entrada
+    source_code = '''
+    if (x == 10) {
+        return x + 20;
+    }
+    '''
+
+    lexer = Lexer(source_code)
+    tokens = lexer.tokenize()
+
+    # Imprimir los tokens generados
+    for token in tokens:
+        print(token)
